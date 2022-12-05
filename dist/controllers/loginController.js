@@ -34,7 +34,7 @@ const loginController = (req, res) => __awaiter(void 0, void 0, void 0, function
             });
             return;
         }
-        res.send('Invalid credentials.');
+        res.status(401).send('Invalid credentials.');
         return;
     }
     catch (err) {

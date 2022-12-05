@@ -29,7 +29,7 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        res.send('Invalid credentials.');
+        res.status(401).send('Invalid credentials.');
         return;
     }
     catch(err){
