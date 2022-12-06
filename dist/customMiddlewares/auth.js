@@ -15,10 +15,10 @@ const verifyJWT = (req, res, next) => {
     try {
         token = token.replace(/^Bearer\s+/, "");
         const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY || "");
-        req['user'] = decoded;
+        req["user"] = decoded;
     }
     catch (err) {
-        res.status(403).json({ message: 'Invalid token.' });
+        res.status(401).json({ message: "Invalid token." });
         return;
     }
     return next();
