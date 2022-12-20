@@ -2,6 +2,7 @@ import { Application } from "express";
 import { Socket } from "socket.io";
 import { NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { setUserData } from "./storage/serverStorage";
 
 export const registerSocketServer = (server: Application) => {
   const io = require("socket.io")(server, {
@@ -20,12 +21,15 @@ export const registerSocketServer = (server: Application) => {
       const socketError = new Error("Token not valid.");
       return next(socketError);
     }
-
     next();
   });
 
-  io.on("connection", (socketDetails: Socket) => {
+  io.on("connection", (socket: Socket) => {
     console.log("user connected.");
-    console.log(socketDetails.id);
+    console.log(socket.id);
+    setUserData(socket, 'addUser');
+    socket.on('disconnect', () => {
+      setUserData(socket, 'removeUser');
+    })
   });
 };

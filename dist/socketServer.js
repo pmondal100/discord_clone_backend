@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerSocketServer = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const serverStorage_1 = require("./storage/serverStorage");
 const registerSocketServer = (server) => {
     const io = require("socket.io")(server, {
         cors: {
@@ -25,9 +26,13 @@ const registerSocketServer = (server) => {
         }
         next();
     });
-    io.on("connection", (socketDetails) => {
+    io.on("connection", (socket) => {
         console.log("user connected.");
-        console.log(socketDetails.id);
+        console.log(socket.id);
+        (0, serverStorage_1.setUserData)(socket, 'addUser');
+        socket.on('disconnect', () => {
+            (0, serverStorage_1.setUserData)(socket, 'removeUser');
+        });
     });
 };
 exports.registerSocketServer = registerSocketServer;
