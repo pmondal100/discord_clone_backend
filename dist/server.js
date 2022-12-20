@@ -29,17 +29,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv = __importStar(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
-const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
+const socketServer_1 = require("./socketServer");
+const http = require("http");
+const cors = require("cors");
+const authRoutes = require("./routes/authRoutes");
 dotenv.config();
 const app = (0, express_1.default)();
 app.use(cors());
-app.use('/auth', authRoutes);
-let mongo_uri = process.env.MONGO_URI || '';
-mongoose_1.default.connect(mongo_uri).then(() => {
-    app.listen(process.env.API_PORT, () => {
-        console.log('Server is running on port: ' + process.env.API_PORT);
+app.use("/auth", authRoutes);
+let mongo_uri = process.env.MONGO_URI || "";
+mongoose_1.default
+    .connect(mongo_uri)
+    .then(() => {
+    const server = http.createServer(app);
+    server.listen(process.env.API_PORT, () => {
+        (0, socketServer_1.registerSocketServer)(server);
+        console.log("Server is running on port: " + process.env.API_PORT);
     });
-}).catch(err => {
+})
+    .catch((err) => {
     console.error(err);
 });
