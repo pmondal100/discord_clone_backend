@@ -15,6 +15,7 @@ const verifyJWT = (req, res, next) => {
     try {
         token = token.replace(/^Bearer\s+/, "");
         const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY || "");
+        //@ts-ignore
         req["user"] = decoded;
     }
     catch (err) {

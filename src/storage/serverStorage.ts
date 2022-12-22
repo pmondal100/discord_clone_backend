@@ -1,17 +1,17 @@
 import { Socket } from "socket.io";
 import { addConnectedUser, removeDisconnectedUser } from "./serverStorageHandlers";
 
-export let usersData: Map<string, { userId: string }> = new Map();
+export let onlineUsersData: Map<string, { userId: string }> = new Map();
 
 export const setUserData = (socket: Socket | any, actionType: string): void => {
   const apiUserData = socket.user;
   switch (actionType) {
     case "addUser": {
-      addConnectedUser(apiUserData, socket, usersData);
+      addConnectedUser(apiUserData, socket, onlineUsersData);
       break;
     }
     case "removeUser": {
-      removeDisconnectedUser(socket.id, usersData);
+      removeDisconnectedUser(socket.id, onlineUsersData);
       break;
     }
     default: {

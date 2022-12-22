@@ -1,8 +1,7 @@
 import express from 'express';
-import authControllers from '../controllers/authControllers';
+import authControllers from '../controllers/auth/authControllers';
 import Joi from 'joi';
 import expressJoiValidator from 'express-joi-validation'
-import verifyJWT from '../customMiddlewares/auth';
 
 const validator = expressJoiValidator.createValidator({});
 
@@ -24,9 +23,5 @@ router.use(express.json());
 router.post('/registerUser', validator.body(registerSchema), authControllers.registerController);
 
 router.post('/loginUser', validator.body(loginSchema), authControllers.loginController);
-
-router.get('/test', verifyJWT, (req: any, res) => {
-    res.status(201).json({ message: `User authentication successfull.`, data: req.user });
-})
 
 module.exports = router;

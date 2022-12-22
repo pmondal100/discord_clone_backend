@@ -6,12 +6,14 @@ import { registerSocketServer } from "./socketServer";
 const http = require("http");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
+const invitationRoutes = require("./routes/invitationRoutes");
 dotenv.config();
 
 const app: Application = express();
 
 app.use(cors());
 app.use("/auth", authRoutes);
+app.use("/friendsInvitation", invitationRoutes);
 
 let mongo_uri: string = process.env.MONGO_URI || "";
 

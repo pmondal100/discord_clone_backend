@@ -1,7 +1,6 @@
 import { Application } from "express";
 import { Socket } from "socket.io";
-import { NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { jwtCheck } from "./socketHandlers/socketJWTCheck";
 import { setUserData } from "./storage/serverStorage";
 
 export const registerSocketServer = (server: Application) => {
@@ -12,17 +11,7 @@ export const registerSocketServer = (server: Application) => {
     },
   });
 
-  io.use((socket: any, next: NextFunction) => {
-    const token = socket.handshake.auth?.jwtToken;
-    try {
-      const decoded = jwt.verify(token, process.env.SECRET_KEY || "");
-      socket["user"] = decoded;
-    } catch (e) {
-      const socketError = new Error("Token not valid.");
-      return next(socketError);
-    }
-    next();
-  });
+  io.use(jwtCheck);
 
   io.on("connection", (socket: Socket) => {
     console.log("user connected.");

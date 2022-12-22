@@ -33,10 +33,12 @@ const socketServer_1 = require("./socketServer");
 const http = require("http");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
+const invitationRoutes = require("./routes/invitationRoutes");
 dotenv.config();
 const app = (0, express_1.default)();
 app.use(cors());
 app.use("/auth", authRoutes);
+app.use("/friendsInvitation", invitationRoutes);
 let mongo_uri = process.env.MONGO_URI || "";
 mongoose_1.default
     .connect(mongo_uri)

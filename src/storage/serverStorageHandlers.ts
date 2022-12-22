@@ -1,10 +1,5 @@
 import { Socket } from "socket.io";
-interface apiUserDataStructure {
-  userId: string;
-  email: string;
-  iat: number;
-  exp: number;
-}
+import { apiUserDataStructure } from "../utils/commonInterfaces";
 
 export const addConnectedUser = (
   apiUserData: apiUserDataStructure,
@@ -13,11 +8,11 @@ export const addConnectedUser = (
 ): void => {
   const userId = apiUserData.userId;
   const socketId = socket.id;
-  usersData.forEach((value, key) => {
-    if (usersData.get(key)?.userId === userId) {
-      usersData.delete(key);
-    }
-  });
+  // usersData.forEach((value, key) => {
+  //   if (usersData.get(key)?.userId === userId) {
+  //     usersData.delete(key);
+  //   }
+  // });
   usersData.set(socketId, { userId: userId });
 };
 
