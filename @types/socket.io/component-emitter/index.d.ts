@@ -1,4 +1,4 @@
-import { apiUserDataStructure } from "../../../utils/commonInterfaces"
+import { apiUserDataStructure } from "../../utils/commonInterfaces"
 
 declare global {
     namespace SocketIO {

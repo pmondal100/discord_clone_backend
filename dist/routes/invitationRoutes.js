@@ -15,4 +15,6 @@ const inviteValidationSchema = joi_1.default.object({
 const router = express_1.default.Router();
 router.use(express_1.default.json());
 router.post('/invite', auth_1.default, validator.body(inviteValidationSchema), friendsInvitationController_1.default.inviteController);
+router.post('/acceptInvite', auth_1.default, friendsInvitationController_1.default.acceptInviteController);
+router.post('/rejectInvite', auth_1.default, friendsInvitationController_1.default.rejectInviteController);
 module.exports = router;

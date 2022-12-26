@@ -15,22 +15,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.inviteController = void 0;
 const userModel_1 = __importDefault(require("../../models/userModel"));
 const invitationModel_1 = __importDefault(require("../../models/invitationModel"));
+const inviteNotification_1 = require("../../socketHandlers/inviteNotification");
 const inviteController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.userId;
         const senderEmail = req.user.email;
-        const recieverEmail = req.body.targetInviteEmail;
-        const target = yield userModel_1.default.findOne({ email: recieverEmail });
+        const receiverEmail = req.body.targetInviteEmail;
+        const target = yield userModel_1.default.findOne({ email: receiverEmail });
         const targetId = target === null || target === void 0 ? void 0 : target._id;
         if (!target) {
-            res.status(404).send(`User ${recieverEmail} is not registered, kindly check the user email and try again.`);
+            res
+                .status(404)
+                .send(`User ${receiverEmail} is not registered, kindly check the user email and try again.`);
             return;
         }
-        if (senderEmail === recieverEmail) {
+        if (senderEmail === receiverEmail) {
             res.status(409).send("Sorry, can't send friend request to yourself");
             return;
         }
-        const invitationAlreadySent = yield invitationModel_1.default.findOne({ senderId: userId, recieverId: targetId });
+        const invitationAlreadySent = yield invitationModel_1.default.findOne({
+            senderId: userId,
+            receiverId: targetId,
+        });
         if (invitationAlreadySent) {
             res.status(400).send("Invitation already sent.");
             return;
@@ -42,14 +48,23 @@ const inviteController = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return false;
         });
         if (alreadyInFriendsList) {
-            res.status(400).send(`You are already friends with the user ${recieverEmail}.`);
+            res
+                .status(400)
+                .send(`You are already friends with the user ${receiverEmail}.`);
             return;
         }
-        yield invitationModel_1.default.create({
-            senderId: userId,
-            recieverId: targetId
-        });
-        res.status(201).send('Invitation sent successfully');
+        try {
+            yield invitationModel_1.default.create({
+                senderId: userId,
+                receiverId: targetId,
+            });
+        }
+        catch (e) {
+            throw new Error(`DB save error:\n, ${e}`);
+        }
+        //@ts-ignore
+        yield (0, inviteNotification_1.userInvite)(targetId);
+        res.status(201).send("Invitation sent successfully");
     }
     catch (e) {
         res.status(500).send(e);

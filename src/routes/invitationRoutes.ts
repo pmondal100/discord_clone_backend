@@ -4,6 +4,7 @@ import Joi from 'joi';
 import expressJoiValidator from 'express-joi-validation'
 import verifyJWT from '../customMiddlewares/auth';
 
+
 const validator = expressJoiValidator.createValidator({});
 
 const inviteValidationSchema = Joi.object({
@@ -14,5 +15,9 @@ const router = express.Router();
 router.use(express.json());
 
 router.post('/invite', verifyJWT, validator.body(inviteValidationSchema), controllers.inviteController);
+
+router.post('/acceptInvite', verifyJWT, controllers.acceptInviteController);
+
+router.post('/rejectInvite', verifyJWT, controllers.rejectInviteController);
 
 module.exports = router;
