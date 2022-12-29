@@ -2,7 +2,7 @@ import { Application } from "express";
 import { Socket } from "socket.io";
 import { jwtCheck } from "./socketHandlers/socketJWTCheck";
 import { setUserData } from "./storage/serverStorage";
-import { userInvite } from "./socketHandlers/inviteNotification";
+import { userInvite, friendsListOnUpdate } from "./socketHandlers/inviteNotification";
 import { apiUserDataStructure } from "./utils/commonInterfaces";
 interface modifiedSocket extends Socket {
   user: apiUserDataStructure
@@ -22,10 +22,15 @@ export const registerSocketServer = (server: Application) => {
 
   io.use(jwtCheck);
 
-  io.on("connection", (socket: modifiedSocket) => {
+  io.on("connection", async (socket: modifiedSocket) => {
+    console.log('connect', socket.id);
     setUserData(socket, 'addUser');
-    userInvite(socket.user.userId);
     socket.on('disconnect', () => {
+      console.log('disconnect', socket.id)
+      setUserData(socket, 'removeUser');
+    })
+    socket.on('disconnected', () => {
+      console.log('disconnected', socket.id)
       setUserData(socket, 'removeUser');
     })
   });

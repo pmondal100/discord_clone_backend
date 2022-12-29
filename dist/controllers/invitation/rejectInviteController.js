@@ -8,7 +8,7 @@ const rejectInviteController = (req, res) => {
         res.status(201).send("Invite rejected successfully.");
     }
     catch (e) {
-        res.status(500).send("Unable to reject the invitation.");
+        res.status(500).send("Something went wrong, please try again.");
     }
 };
 exports.default = rejectInviteController;
