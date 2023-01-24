@@ -8,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerSocketServer = exports.ioInstance = void 0;
 const socketJWTCheck_1 = require("./socketHandlers/socketJWTCheck");
 const serverStorage_1 = require("./storage/serverStorage");
+const directMessageHandler_1 = __importDefault(require("./socketHandlers/directMessageHandler"));
 const registerSocketServer = (server) => {
     const io = require("socket.io")(server, {
         cors: {
@@ -31,6 +35,9 @@ const registerSocketServer = (server) => {
         socket.on('disconnected', () => {
             console.log('disconnected', socket.id);
             (0, serverStorage_1.setUserData)(socket, 'removeUser');
+        });
+        socket.on('direct-message', (data) => {
+            (0, directMessageHandler_1.default)(data);
         });
     }));
 };

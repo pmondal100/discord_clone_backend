@@ -2,8 +2,9 @@ import { Application } from "express";
 import { Socket } from "socket.io";
 import { jwtCheck } from "./socketHandlers/socketJWTCheck";
 import { setUserData } from "./storage/serverStorage";
-import { userInvite, friendsListOnUpdate } from "./socketHandlers/inviteNotification";
 import { apiUserDataStructure } from "./utils/commonInterfaces";
+import directMessageHandler from "./socketHandlers/directMessageHandler";
+
 interface modifiedSocket extends Socket {
   user: apiUserDataStructure
 }
@@ -32,6 +33,9 @@ export const registerSocketServer = (server: Application) => {
     socket.on('disconnected', () => {
       console.log('disconnected', socket.id)
       setUserData(socket, 'removeUser');
+    })
+    socket.on('direct-message', (data) => {
+      directMessageHandler(data);
     })
   });
 };
