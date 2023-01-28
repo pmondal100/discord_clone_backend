@@ -2,6 +2,7 @@ import { ObjectId } from "mongoose";
 import { Socket } from "socket.io";
 import { apiUserDataStructure } from "../utils/commonInterfaces";
 import { userInvite, friendsListOnUpdate } from "../socketHandlers/inviteNotification";
+import userModel from "../models/userModel";
 import _ from 'lodash';
 
 export let onlineUsersData: Map<string, { userId: string, timestamp: number }> = new Map();
@@ -65,3 +66,11 @@ export const onlineUserSockets = (
   });
   return userSocketList;
 };
+
+export const getUserFromSocketId = async (socketId: string): Promise<any> => {
+  const mapArr = Array.from(onlineUsersData);
+  let userObj = mapArr.find((currEle) => {
+    return socketId === currEle[0];
+  })
+  return await userModel.findById(userObj?.[1].userId);
+}

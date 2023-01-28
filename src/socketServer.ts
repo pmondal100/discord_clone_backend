@@ -1,7 +1,7 @@
 import { Application } from "express";
 import { Socket } from "socket.io";
 import { jwtCheck } from "./socketHandlers/socketJWTCheck";
-import { setUserData } from "./storage/serverStorage";
+import { setUserData, getUserFromSocketId } from "./storage/serverStorage";
 import { apiUserDataStructure } from "./utils/commonInterfaces";
 import directMessageHandler from "./socketHandlers/directMessageHandler";
 
@@ -34,8 +34,9 @@ export const registerSocketServer = (server: Application) => {
       console.log('disconnected', socket.id)
       setUserData(socket, 'removeUser');
     })
-    socket.on('direct-message', (data) => {
-      directMessageHandler(data);
+    socket.on('direct-message', async (data) => {
+      const userObj = await getUserFromSocketId(data.socketId);
+      directMessageHandler(data, userObj._id.toString());
     })
   });
 };

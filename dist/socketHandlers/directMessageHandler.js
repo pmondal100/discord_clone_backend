@@ -16,66 +16,68 @@ const serverStorage_1 = require("../storage/serverStorage");
 const socketServer_1 = require("../socketServer");
 const conversationModel_1 = __importDefault(require("../models/conversationModel"));
 const messageModel_1 = __importDefault(require("../models/messageModel"));
-const directMessageHandler = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    if (data === undefined) {
-        updateDirectChatHistory(undefined, true);
+const directMessageHandler = (data, currentUser) => __awaiter(void 0, void 0, void 0, function* () {
+    if ((data === null || data === void 0 ? void 0 : data.message) === undefined) {
+        const conversation = yield conversationModel_1.default.findOne({
+            participants: { $all: [currentUser, data.targetId] },
+        });
+        yield updateDirectChatHistory(conversation === null || conversation === void 0 ? void 0 : conversation._id.toString(), true, currentUser);
         return;
     }
     const target = data === null || data === void 0 ? void 0 : data.targetId;
     const message = data === null || data === void 0 ? void 0 : data.message;
     // store message to the db
     const messageObj = yield messageModel_1.default.create({
-        author: serverStorage_1.currentUser,
+        author: currentUser,
         date: new Date(),
-        type: 'Direct',
-        content: message
+        type: "Direct",
+        content: message,
     });
     // store message in the conversation
-    const conversation = yield conversationModel_1.default.findOne({
-        participants: { $all: [serverStorage_1.currentUser, target] },
+    let conversation = yield conversationModel_1.default.findOne({
+        participants: { $all: [currentUser, target] },
     });
     if (conversation) {
         conversation.messages.push(messageObj._id);
         yield conversation.save();
     }
     else {
-        yield conversationModel_1.default.create({
-            participants: [
-                serverStorage_1.currentUser,
-                target
-            ],
-            messages: [
-                messageObj._id
-            ]
+        conversation = yield conversationModel_1.default.create({
+            participants: [currentUser, target],
+            messages: [messageObj._id],
         });
     }
-    updateDirectChatHistory(conversation === null || conversation === void 0 ? void 0 : conversation._id.toString(), false);
+    yield updateDirectChatHistory(conversation === null || conversation === void 0 ? void 0 : conversation._id.toString(), false, currentUser);
 });
-const updateDirectChatHistory = (conversationId, updateSingleUser) => __awaiter(void 0, void 0, void 0, function* () {
+const updateDirectChatHistory = (conversationId, updateSingleUser, currentUser) => __awaiter(void 0, void 0, void 0, function* () {
+    const conversationObj = yield conversationModel_1.default.findById(conversationId).populate({
+        path: "messages",
+        model: "Message",
+        populate: {
+            path: "author",
+            model: "User",
+            select: "username _id",
+        },
+    });
     if (!updateSingleUser) {
-        const conversationObj = yield conversationModel_1.default.findById(conversationId).populate({
-            path: 'messages',
-            model: 'Message',
-            populate: {
-                path: 'author',
-                model: 'User',
-                select: 'username _id'
-            }
-        });
         conversationObj === null || conversationObj === void 0 ? void 0 : conversationObj.participants.forEach((currParticipant) => {
             const userSocketList = (0, serverStorage_1.onlineUserSockets)(currParticipant.toString());
             if (userSocketList.length > 0) {
                 userSocketList.forEach((currSocket) => {
-                    socketServer_1.ioInstance.to(currSocket).emit('direct-message-history');
+                    socketServer_1.ioInstance.to(currSocket).emit("direct-message-history", {
+                        conversationObj,
+                    });
                 });
             }
         });
     }
     else {
-        const userSocketList = (0, serverStorage_1.onlineUserSockets)(serverStorage_1.currentUser.toString());
+        const userSocketList = (0, serverStorage_1.onlineUserSockets)(currentUser.toString());
         if (userSocketList.length > 0) {
             userSocketList.forEach((currSocket) => {
-                socketServer_1.ioInstance.to(currSocket).emit('direct-message-history');
+                socketServer_1.ioInstance.to(currSocket).emit("direct-message-history", {
+                    conversationObj,
+                });
             });
         }
     }

@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onlineUserSockets = exports.setUserData = exports.currentUser = exports.onlineUsersData = void 0;
+exports.getUserFromSocketId = exports.onlineUserSockets = exports.setUserData = exports.currentUser = exports.onlineUsersData = void 0;
 const inviteNotification_1 = require("../socketHandlers/inviteNotification");
+const userModel_1 = __importDefault(require("../models/userModel"));
 exports.onlineUsersData = new Map();
 exports.currentUser = '';
 const setUserData = (socket, actionType) => {
@@ -61,3 +65,11 @@ const onlineUserSockets = (user_doc_id) => {
     return userSocketList;
 };
 exports.onlineUserSockets = onlineUserSockets;
+const getUserFromSocketId = (socketId) => __awaiter(void 0, void 0, void 0, function* () {
+    const mapArr = Array.from(exports.onlineUsersData);
+    let userObj = mapArr.find((currEle) => {
+        return socketId === currEle[0];
+    });
+    return yield userModel_1.default.findById(userObj === null || userObj === void 0 ? void 0 : userObj[1].userId);
+});
+exports.getUserFromSocketId = getUserFromSocketId;

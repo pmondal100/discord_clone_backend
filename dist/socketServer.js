@@ -36,9 +36,10 @@ const registerSocketServer = (server) => {
             console.log('disconnected', socket.id);
             (0, serverStorage_1.setUserData)(socket, 'removeUser');
         });
-        socket.on('direct-message', (data) => {
-            (0, directMessageHandler_1.default)(data);
-        });
+        socket.on('direct-message', (data) => __awaiter(void 0, void 0, void 0, function* () {
+            const userObj = yield (0, serverStorage_1.getUserFromSocketId)(data.socketId);
+            (0, directMessageHandler_1.default)(data, userObj._id.toString());
+        }));
     }));
 };
 exports.registerSocketServer = registerSocketServer;
