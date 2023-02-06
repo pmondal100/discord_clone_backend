@@ -1,10 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const serverStorage_1 = require("../../storage/serverStorage");
 const inviteNotification_1 = require("../../socketHandlers/inviteNotification");
 const acceptInviteController = (req, res) => {
     try {
-        (0, inviteNotification_1.acceptInvite)(req.body.id, serverStorage_1.currentUser);
+        (0, inviteNotification_1.acceptInvite)(req.body.recieverMail, req.body.senderId);
         res.status(201).send('Request accepted successfully.');
     }
     catch (e) {

@@ -27,16 +27,6 @@ export const userInvite = async (
   }
 };
 
-// export const friendsListOnStartup = async (user_doc_id: ObjectId | String): Promise<void> => {
-//   const friendsListWithStatus = await getUpdatedFriendsList(user_doc_id);
-//   const userSocketList = onlineUserSockets(user_doc_id);
-//   userSocketList.forEach((currSocketId) => {
-//     ioInstance
-//       .to(currSocketId.toString())
-//       .emit("friendsListOnStartup", { friendsList: friendsListWithStatus });
-//   });
-// };
-
 export const friendsListOnUpdate = async (user_doc_id: ObjectId | String): Promise<void> => {
   await Promise.all(
     Array.from(onlineUsersData).map(async (currEle) => {
@@ -52,19 +42,22 @@ export const friendsListOnUpdate = async (user_doc_id: ObjectId | String): Promi
 };
 
 export const acceptInvite = async (
-  sender_user_doc_id: ObjectId | String,
-  receiver_user_doc_id: ObjectId | String
+  recieverMail: String,
+  sender_user_doc_id: ObjectId | String
 ): Promise<void> => {
   // update senders friend list
   let sender: any = await User.findById(sender_user_doc_id.toString());
-  sender.friends = [...sender?.friends, receiver_user_doc_id];
-  sender?.save();
+  let receiver: any = await User.findOne({email: recieverMail});
+  // let receiver = receiverList[0];
+  sender.friends = [...sender?.friends, receiver._id.toString()];
+  await sender?.save();
   // update recievers friend list
-  let receiver: any = await User.findById(receiver_user_doc_id.toString());
   receiver.friends = [...receiver?.friends, sender_user_doc_id];
-  receiver?.save();
+  await receiver?.save();
 
-  removeInvite(sender_user_doc_id, receiver_user_doc_id);
+  removeInvite(sender_user_doc_id, receiver._id.toString());
+  friendsListOnUpdate(sender_user_doc_id);
+  friendsListOnUpdate(receiver._id.toString());
 };
 
 export const rejectInvite = async (

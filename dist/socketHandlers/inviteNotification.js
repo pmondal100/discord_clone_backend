@@ -35,15 +35,6 @@ const userInvite = (user_doc_id) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.userInvite = userInvite;
-// export const friendsListOnStartup = async (user_doc_id: ObjectId | String): Promise<void> => {
-//   const friendsListWithStatus = await getUpdatedFriendsList(user_doc_id);
-//   const userSocketList = onlineUserSockets(user_doc_id);
-//   userSocketList.forEach((currSocketId) => {
-//     ioInstance
-//       .to(currSocketId.toString())
-//       .emit("friendsListOnStartup", { friendsList: friendsListWithStatus });
-//   });
-// };
 const friendsListOnUpdate = (user_doc_id) => __awaiter(void 0, void 0, void 0, function* () {
     yield Promise.all(Array.from(serverStorage_1.onlineUsersData).map((currEle) => __awaiter(void 0, void 0, void 0, function* () {
         const key = currEle[1].userId;
@@ -56,16 +47,19 @@ const friendsListOnUpdate = (user_doc_id) => __awaiter(void 0, void 0, void 0, f
     })));
 });
 exports.friendsListOnUpdate = friendsListOnUpdate;
-const acceptInvite = (sender_user_doc_id, receiver_user_doc_id) => __awaiter(void 0, void 0, void 0, function* () {
+const acceptInvite = (recieverMail, sender_user_doc_id) => __awaiter(void 0, void 0, void 0, function* () {
     // update senders friend list
     let sender = yield userModel_1.default.findById(sender_user_doc_id.toString());
-    sender.friends = [...sender === null || sender === void 0 ? void 0 : sender.friends, receiver_user_doc_id];
-    sender === null || sender === void 0 ? void 0 : sender.save();
+    let receiver = yield userModel_1.default.findOne({ email: recieverMail });
+    // let receiver = receiverList[0];
+    sender.friends = [...sender === null || sender === void 0 ? void 0 : sender.friends, receiver._id.toString()];
+    yield (sender === null || sender === void 0 ? void 0 : sender.save());
     // update recievers friend list
-    let receiver = yield userModel_1.default.findById(receiver_user_doc_id.toString());
     receiver.friends = [...receiver === null || receiver === void 0 ? void 0 : receiver.friends, sender_user_doc_id];
-    receiver === null || receiver === void 0 ? void 0 : receiver.save();
-    removeInvite(sender_user_doc_id, receiver_user_doc_id);
+    yield (receiver === null || receiver === void 0 ? void 0 : receiver.save());
+    removeInvite(sender_user_doc_id, receiver._id.toString());
+    (0, exports.friendsListOnUpdate)(sender_user_doc_id);
+    (0, exports.friendsListOnUpdate)(receiver._id.toString());
 });
 exports.acceptInvite = acceptInvite;
 const rejectInvite = (sender_user_doc_id, receiver_user_doc_id) => __awaiter(void 0, void 0, void 0, function* () {
